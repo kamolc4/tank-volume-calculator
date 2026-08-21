@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tank Volume Calculator</title>
+  <meta
+    name="description"
+    content="A tiny open-source calculator for cylindrical tank volume."
+  />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f6f6f6;
+      color: #111;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 2rem;
+    }
+
+    p {
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .field {
+      margin-top: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #bbb;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #fff;
+    }
+
+    .result {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 12px;
+      background: #111;
+      color: #fff;
+    }
+
+    .result strong {
+      display: block;
+      font-size: 1.5rem;
+      margin-top: 6px;
+    }
+
+    .formula {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid #ddd;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    a {
+      color: #111;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Tank Volume Calculator</h1>
+
+    <p>
+      Calculate the capacity of a cylindrical tank from its diameter and length.
+      The result is shown in liters, US gallons, cubic feet, and cubic meters.
+    </p>
+
+    <div class="field">
+      <label for="diameter">Tank diameter</label>
+      <input id="diameter" type="number" min="0" step="any" value="2" />
+    </div>
+
+    <div class="field">
+      <label for="length">Tank length</label>
+      <input id="length" type="number" min="0" step="any" value="5" />
+    </div>
+
+    <div class="field">
+      <label for="unit">Input unit</label>
+      <select id="unit">
+        <option value="m">Meters</option>
+        <option value="cm">Centimeters</option>
+        <option value="ft">Feet</option>
+        <option value="in">Inches</option>
+      </select>
+    </div>
+
+    <div class="result" aria-live="polite">
+      Tank volume
+      <strong id="liters">—</strong>
+      <div id="other-results"></div>
+    </div>
+
+    <div class="formula">
+      Formula: V = π × r² × L
+    </div>
+
+    <p class="formula">
+      Looking for the full web version?
+      <a href="https://calciro.com/tank-volume-calculator">
+        Open the Tank Volume Calculator on Calciro
+      </a>
+    </p>
+  </main>
+
+  <script>
+    const diameterInput = document.getElementById("diameter");
+    const lengthInput = document.getElementById("length");
+    const unitSelect = document.getElementById("unit");
+    const litersOutput = document.getElementById("liters");
+    const otherResults = document.getElementById("other-results");
+
+    const toMeters = {
+      m: 1,
+      cm: 0.01,
+      ft: 0.3048,
+      in: 0.0254
+    };
+
+    function formatNumber(value, decimals = 2) {
+      return new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: decimals
+      }).format(value);
+    }
+
+    function calculate() {
+      const diameter = Number(diameterInput.value);
+      const length = Number(lengthInput.value);
+      const factor = toMeters[unitSelect.value];
+
+      if (
+        !Number.isFinite(diameter) ||
+        !Number.isFinite(length) ||
+        diameter <= 0 ||
+        length <= 0
+      ) {
+        litersOutput.textContent = "Enter valid positive values";
+        otherResults.textContent = "";
+        return;
+      }
+
+      const diameterMeters = diameter * factor;
+      const lengthMeters = length * factor;
+      const radiusMeters = diameterMeters / 2;
+
+      const cubicMeters =
+        Math.PI * radiusMeters * radiusMeters * lengthMeters;
+
+      const liters = cubicMeters * 1000;
+      const gallons = cubicMeters * 264.172052;
+      const cubicFeet = cubicMeters * 35.314667;
+
+      litersOutput.textContent = `${formatNumber(liters)} liters`;
+
+      otherResults.innerHTML = `
+        ${formatNumber(gallons)} US gallons<br>
+        ${formatNumber(cubicFeet)} ft³<br>
+        ${formatNumber(cubicMeters, 4)} m³
+      `;
+    }
+
+    diameterInput.addEventListener("input", calculate);
+    lengthInput.addEventListener("input", calculate);
+    unitSelect.addEventListener("change", calculate);
+
+    calculate();
+  </script>
+</body>
+</html>
